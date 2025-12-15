@@ -1,0 +1,8 @@
+build/
+sdkconfig
+sdkconfig.old
+CmakeLists.txt
+dependencies.lock
+README.md
+managed_components/
+.clangd
