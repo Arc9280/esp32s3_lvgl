@@ -4,9 +4,10 @@
 #include "esp_log.h"
 #include "esp_heap_caps.h"
 #include "driver/gpio.h"
-#include "driver/i2c.h"
+//#include "driver/i2c.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_rgb.h"
+#include "driver/i2c_master.h"
 
 static const char *TAG = "RGB_RAW";
 
@@ -80,6 +81,8 @@ static esp_err_t i2c_master_init(void)
     return i2c_param_config(i2c_master_port, &i2c_conf) ||
            i2c_driver_install(i2c_master_port, i2c_conf.mode, 0, 0, 0);
 }
+
+
 
 /**
  * @brief 配置 IO 扩展芯片 (CH422G)
