@@ -11,15 +11,14 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_rgb.h"
 #include "esp_lcd_panel_io.h"
+#include "iic_init.h"
 
 //I2C相关配置
-#define I2C_MASTER_SCL_IO           9
-#define I2C_MASTER_SDA_IO           8
-#define I2C_MASTER_NUM              0
-#define I2C_MASTER_FREQ_HZ          400000
-#define I2C_MASTER_TIMEOUT_MS       1000
-#define I2C_MASTER_TX_BUF_DISABLE   0                           /*!< I2C master doesn't need buffer */
-#define I2C_MASTER_RX_BUF_DISABLE   0                           /*!< I2C master doesn't need buffer */
+#define I2C_CH422_SCL_IO           9
+#define I2C_CH422_SDA_IO           8
+#define I2C_CH422_NUM              0
+#define I2C_CH422_FREQ_HZ          400000
+#define I2C_CH422_TIMEOUT_MS       1000
 
 //触摸芯片的GPIO
 #define GPIO_INPUT_IO_4     4

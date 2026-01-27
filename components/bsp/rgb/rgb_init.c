@@ -1,37 +1,15 @@
 #include "rgb_init.h"
 
-i2c_master_bus_handle_t bus_handle;
-i2c_master_dev_handle_t ch422_config_handle;
-i2c_master_dev_handle_t ch422_output_handle;
+static i2c_master_dev_handle_t ch422_config_handle;
+static i2c_master_dev_handle_t ch422_output_handle;
 
 /**
  * @brief i2c master initialization
  */
 static void i2c_master_init()
 {
-    i2c_master_bus_config_t bus_config = {
-        .i2c_port = I2C_MASTER_NUM,
-        .sda_io_num = I2C_MASTER_SDA_IO,
-        .scl_io_num = I2C_MASTER_SCL_IO,
-        .clk_source = I2C_CLK_SRC_DEFAULT,
-        .glitch_ignore_cnt = 7,
-        .flags.enable_internal_pullup = true,
-    };
-    ESP_ERROR_CHECK(i2c_new_master_bus(&bus_config, &bus_handle));
-
-    i2c_device_config_t dev_config_24 = {
-        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-        .device_address = 0x24,
-        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
-    };
-    ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_config_24, &ch422_config_handle));
-
-    i2c_device_config_t dev_config_38 = {
-        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-        .device_address = 0x38,
-        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
-    };
-    ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_config_38, &ch422_output_handle));
+    ESP_ERROR_CHECK(i2c_device_init(0x24, &ch422_config_handle, I2C_CH422_FREQ_HZ));
+    ESP_ERROR_CHECK(i2c_device_init(0x38, &ch422_output_handle, I2C_CH422_FREQ_HZ));
 }
 
 /**
@@ -40,7 +18,7 @@ static void i2c_master_init()
 static esp_err_t ch422_register_write_byte(i2c_master_dev_handle_t dev_handle, uint8_t data)
 {
     uint8_t write_buf = data;
-    return i2c_master_transmit(dev_handle, &write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    return i2c_master_transmit(dev_handle, &write_buf, sizeof(write_buf), I2C_CH422_TIMEOUT_MS / portTICK_PERIOD_MS);
 }
 
 /**
