@@ -34,6 +34,9 @@ static  unsigned short inv_row_2_scale(const signed char *row) //用于初始化
 
 }
 
+//i2c设备句柄
+static i2c_master_dev_handle_t dev_handle;
+
 static  unsigned short inv_orientation_matrix_to_scalar(
     const signed char *mtx) //用于初始化DMP
 {
@@ -72,8 +75,6 @@ static void run_self_test(void) //用于初始化DMP
     }
 
 }
-
-static i2c_master_dev_handle_t dev_handle;
 
 void delay_ms(uint32_t ms) 
 {
@@ -212,29 +213,23 @@ int i2c_write(unsigned char slave_addr, unsigned char reg_addr,
               unsigned char length, unsigned char const *data)
 {
     if (dev_handle == NULL) {
-        return -1; // 句柄未初始化
+        return -1;
     }
-
-    // 忽略 slave_addr，避免编译警告
+    
     (void)slave_addr;
 
-    // ESP-IDF v5 写操作需要将 "寄存器地址" 和 "数据" 放在同一个 buffer 发送
-    // 申请内存：1字节寄存器地址 + length字节数据
-    uint8_t *write_buf = (uint8_t *)malloc(length + 1);
-    if (write_buf == NULL) {
-        return ESP_ERR_NO_MEM;
+    uint8_t write_buf[32]; 
+    
+    if (length >= sizeof(write_buf)) {
+        return -1;  // 长度检查
     }
-
-    // 填充 buffer
+    
     write_buf[0] = reg_addr;
     memcpy(&write_buf[1], data, length);
-
-    // 发送
-    esp_err_t ret = i2c_master_transmit(dev_handle, write_buf, length + 1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-
-    free(write_buf);
-
-    // MPU6050 官方驱动通常约定 0 为成功
+    
+    esp_err_t ret = i2c_master_transmit(dev_handle, write_buf, length + 1, 
+                                         I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    
     return (ret == ESP_OK) ? 0 : -1;
 }
 
