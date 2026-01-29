@@ -1,4 +1,15 @@
 #include "wifi_init.h"
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+#include "esp_system.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "esp_log.h"
+
+#include "lwip/err.h"
+#include "lwip/sys.h"
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -10,6 +21,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_FAIL_BIT      BIT1
 #define TAG "wifi init"
 
+ESP_EVENT_DEFINE_BASE(WIFI_EVENTS);
 static int s_retry_num = 0;
 
 static void event_handler(void* arg, esp_event_base_t event_base,
@@ -31,6 +43,9 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+
+        // 发送事件通知其他模块（SNTP）WiFi已连接
+        esp_event_post(WIFI_EVENTS, WIFI_CONNECTED_FOR_SNTP, NULL, 0, portMAX_DELAY);
     }
 }
 
@@ -40,7 +55,7 @@ void wifi_init_sta(void)
 
     ESP_ERROR_CHECK(esp_netif_init());
 
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    // ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();

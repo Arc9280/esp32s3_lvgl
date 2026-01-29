@@ -4,10 +4,11 @@
 #include "esp_log.h"
 #include "rgb_init.h"
 #include "lv_port.h"
-#include "lv_demos.h"
 #include "mpu6050.h"
 #include "iic_init.h"
 #include "wifi_init.h"
+#include "sntp.h"
+#include "nvs_flash.h"
 
 //static const char *TAG = "RGB_RAW";
 
@@ -20,18 +21,23 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+    //初始化默认事件循环
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     i2c_bus_init();
     ESP_ERROR_CHECK(MPU6050_Init());
-    ESP_ERROR_CHECK(app_lvgl_init());
     DMP_Init();
+    ESP_ERROR_CHECK(app_lvgl_init());
+    lvgl_port_lock(0);
+    lv_demo_widgets();
+    lvgl_port_unlock();
+
+    time_init();
     wifi_init_sta();
 
     float pitch, roll, yaw;
 
-    lvgl_port_lock(0);
-    lv_demo_widgets();
-    lvgl_port_unlock();
+    
 
     while (1)
     {
