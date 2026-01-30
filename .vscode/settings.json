@@ -1,5 +1,8 @@
 {
 "C_Cpp.intelliSenseEngine": "disabled",
 "idf.flashType": "UART",
-"idf.portWin": "COM6"
+"idf.portWin": "COM6",
+"idf.openOcdConfigs": [
+    "board/esp32s3-bridge.cfg"
+]
 }
